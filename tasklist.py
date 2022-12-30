@@ -11,6 +11,7 @@ if not os.path.isfile(task_path):
         writer = csv.writer(task_file)
         writer.writerow(["Task", "Subject", "Due Date", "Description"])
         print("Task list created.")
+        input("Press enter to continue...")
 
 deleted_task_path = os.getcwd() + "\\deleted_tasks.csv"
 if not os.path.isfile(deleted_task_path):
@@ -19,6 +20,7 @@ if not os.path.isfile(deleted_task_path):
         writer = csv.writer(deleted_task_file)
         writer.writerow(["Task", "Subject", "Due Date", "Description"])
         print("Deleted task list created.")
+        input("Press enter to continue...")
 
 class Task:
     
@@ -93,6 +95,15 @@ class TaskList(sllist):
         self.save_tasks()
         print("Task added at the index " + str(index) + ".")
 
+    def remove_task_at(self, index):
+        at = self.nodeat(index - 1)
+        self.remove(at)
+        self.save_tasks()
+        print("Task removed at the index " + str(index) + ".")
+
+    def remove_task_by_name(self, name):
+        pass
+
 def display_menu():
     print("Menu: [1] Display tasks, [2] Add task, [3] Delete task, [4] Undo, [5] Redo, [6] Exit\n")
 
@@ -107,6 +118,7 @@ while True:
         task_list.display_tasks()
         input("Press enter to continue...")
     elif selection == 2:
+        task_list.display_tasks()
         task = input("Enter the task: ")
         if task == "":
             task = "No task"
@@ -132,6 +144,15 @@ while True:
             task_list.add_task_end(task, subject, due_date, description)
         elif option == 3:
             task_list.add_task_at(task, subject, due_date, description, int(input("Enter the index: ")))
+        input("Press enter to continue...")
+    elif selection == 3:
+        task_list.display_tasks()
+        print("Delete task: [1] By index, [2] By name")
+        option = int(input("Enter a number to select an option: "))
+        if option == 1:
+            task_list.remove_task_at(int(input("Enter the index: ")))
+        elif option == 2:
+            task_list.remove_task_by_name(input("Enter the name: "))
         input("Press enter to continue...")
     elif selection == 6:
         break
