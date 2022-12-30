@@ -75,9 +75,11 @@ class TaskList(sllist):
                 writer.writerow([task.task, task.subject, task.due_date, task.description])
 
     def display_tasks(self):
+        i = 1
         print("Tasks:")
         for task in self:
-            print (task)
+            print (f"[{i}] {task}")
+            i += 1
 
     def add_task_start(self, task, subject, due_date, description):
         self.appendleft(Task(task, subject, due_date, description))
@@ -90,22 +92,37 @@ class TaskList(sllist):
         print("Task added to the end of the list.")
 
     def add_task_at(self, task, subject, due_date, description, index):
-        at = self.nodeat(index - 1)
-        self.insert(Task(task, subject, due_date, description), at)
+        self.insert(Task(task, subject, due_date, description), self.nodeat(index - 1))
         self.save_tasks()
         print("Task added at the index " + str(index) + ".")
 
     def remove_task_at(self, index):
-        at = self.nodeat(index - 1)
-        self.remove(at)
+        self.remove(self.nodeat(index - 1))
         self.save_tasks()
         print("Task removed at the index " + str(index) + ".")
 
     def remove_task_by_name(self, name):
-        pass
+        task_count = 0
+        for task in self:
+            if task.task == name:
+                task_count += 1
+        if task_count == 0:
+            print("No tasks with that name found.")
+        elif task_count == 1:
+            task_index = 0
+            for task in self:
+                if task.task == name:
+                    self.remove(self.nodeat(task_index))
+                    self.save_tasks()
+                    print("Task removed.")
+                task_index += 1
+        else:
+            print("There are multiple tasks with the same name. Please use the index to remove the task.")
+            index = int(input("Enter the index of the task to remove: "))
+            self.remove_task_at(index)
 
 def display_menu():
-    print("Menu: [1] Display tasks, [2] Add task, [3] Delete task, [4] Undo, [5] Redo, [6] Exit\n")
+    print("Menu: [0] Help | [1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Exit\n")
 
 task_list = TaskList()
 
@@ -113,10 +130,13 @@ while True:
     os.system("cls")
     display_menu()
     selection = int(input("Enter a number to select an option: "))
-    if selection == 1:
+    if selection == 0:
+        print("Not implemented yet, fool!")
+        input("Press enter to return to menu...")
+    elif selection == 1:
         os.system("cls")
         task_list.display_tasks()
-        input("Press enter to continue...")
+        input("Press enter to return to menu...")
     elif selection == 2:
         task_list.display_tasks()
         task = input("Enter the task: ")
@@ -129,7 +149,7 @@ while True:
         due_date_in_seconds = time.mktime(time.strptime(due_date, "%Y-%m-%d"))
         if due_date_in_seconds < time.time():
             print("Invalid due date. The due date must be in the future.")
-            input("Press enter to continue...")
+            input("Press enter to return to menu...")
             continue
         elif due_date == "":
             due_date = "No due date"
@@ -144,7 +164,7 @@ while True:
             task_list.add_task_end(task, subject, due_date, description)
         elif option == 3:
             task_list.add_task_at(task, subject, due_date, description, int(input("Enter the index: ")))
-        input("Press enter to continue...")
+        input("Press enter to return to menu...")
     elif selection == 3:
         task_list.display_tasks()
         print("Delete task: [1] By index, [2] By name")
@@ -153,8 +173,14 @@ while True:
             task_list.remove_task_at(int(input("Enter the index: ")))
         elif option == 2:
             task_list.remove_task_by_name(input("Enter the name: "))
-        input("Press enter to continue...")
+        input("Press enter to return to menu...")
+    elif selection == 4:
+        pass
+    elif selection == 5:
+        pass
     elif selection == 6:
+        pass
+    elif selection == 7:
         break
 
 input("Press enter to exit...")
