@@ -189,14 +189,28 @@ class TaskList(sllist):
     def remove_all_tasks(self):
         self.save_deleted_tasks(self)
         node = self.first
-        print(node)
+        next = node.next
+        if node is not None:
+            while next is not None:
+                self.remove(node)
+                node = next
+                next = node.next
+            self.remove(node)
         self.save_tasks()
         print("All tasks removed.")
+    
+    def undo(self):
+        with open(deleted_task_path, "w", newline="") as task_file:
+            writer = csv.writer(task_file)
+            writer.writerow(["Task", "Subject", "Due Date", "Description"])
+            for task in self:
+                writer.writerow([task.task, task.subject, task.due_date, task.description])
+        print("Last action undone.")
     
 
 
 def display_menu():
-    print("Menu:\n[1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Clear tasks | [8] Exit\n")
+    print("Menu:[0] Help\n[1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Clear tasks | [8] Exit\n")
 
 task_list = TaskList()
 
