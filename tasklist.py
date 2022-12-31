@@ -1,7 +1,7 @@
 import os
 import csv
-import time
-from pyllist import sllist
+import datetime
+from pyllist import sllist, sllistnode
 from collections import deque
 
 task_path = os.getcwd() + "\\tasks.csv"
@@ -58,7 +58,7 @@ class TaskList(sllist):
     def __init__(self):
         super().__init__()
         self.load_tasks()
-
+###
     def load_tasks(self):
         with open(task_path, "r", newline="") as task_file:
             print("Loading tasks...")
@@ -66,41 +66,40 @@ class TaskList(sllist):
             next(reader)
             for row in reader:
                 self.append(Task(row[0], row[1], row[2], row[3]))
-
+###
     def save_tasks(self):
         with open(task_path, "w", newline="") as task_file:
             writer = csv.writer(task_file)
             writer.writerow(["Task", "Subject", "Due Date", "Description"])
             for task in self:
                 writer.writerow([task.task, task.subject, task.due_date, task.description])
-
+###
     def display_tasks(self):
         i = 1
         print("Tasks:")
         for task in self:
             print (f"[{i}] {task}")
             i += 1
-
     def add_task_start(self, task, subject, due_date, description):
         self.appendleft(Task(task, subject, due_date, description))
         self.save_tasks()
         print("Task added to the start of the list.")
-
+###
     def add_task_end(self, task, subject, due_date, description):
         self.append(Task(task, subject, due_date, description))
         self.save_tasks()
         print("Task added to the end of the list.")
-
+###
     def add_task_at(self, task, subject, due_date, description, index):
         self.insert(Task(task, subject, due_date, description), self.nodeat(index - 1))
         self.save_tasks()
         print("Task added at the index " + str(index) + ".")
-
+###
     def remove_task_at(self, index):
         self.remove(self.nodeat(index - 1))
         self.save_tasks()
         print("Task removed at the index " + str(index) + ".")
-
+###
     def remove_task_by_name(self, name):
         task_count = 0
         for task in self:
@@ -109,20 +108,95 @@ class TaskList(sllist):
         if task_count == 0:
             print("No tasks with that name found.")
         elif task_count == 1:
-            task_index = 0
-            for task in self:
+            for index, task in enumerate(self):
                 if task.task == name:
-                    self.remove(self.nodeat(task_index))
+                    self.remove(self.nodeat(index))
                     self.save_tasks()
                     print("Task removed.")
-                task_index += 1
         else:
             print("There are multiple tasks with the same name. Please use the index to remove the task.")
             index = int(input("Enter the index of the task to remove: "))
             self.remove_task_at(index)
+###
+    def search_by_due_date(self, due_date):
+        os.system("cls")
+        print("The following tasks are due on " + due_date + ":")
+        for index, task in enumerate(self):
+            if task.due_date == due_date:
+                print(f"[{index + 1}] {task}")
+    
+    def search_by_subject(self, subject):
+        os.system("cls")
+        print("The following tasks are in the " + subject + " subject:")
+        for index, task in enumerate(self):
+            if task.subject == subject:
+                print(f"[{index + 1}] {task}")
+    
+    def edit_task(self, index, choice, new_value):
+        if choice == 1:
+            self.nodeat(index - 1).value.task = new_value
+        elif choice == 2:
+            self.nodeat(index - 1).value.subject = new_value
+        elif choice == 3:
+            if len(new_value) != 10:
+                print("Invalid date format. Please use YYYY-MM-DD.")
+                input("Press enter to return to menu...")
+                return
+            if datetime.datetime.strptime(new_value, "%Y-%m-%d") < datetime.datetime.now():
+                print("Invalid date. Please enter a date that has not already passed.")
+                return
+            self.nodeat(index - 1).value.due_date = new_value
+        elif choice == 4:
+            self.nodeat(index - 1).value.description = new_value
+        self.save_tasks()
+        print("Task edited.")
+    
+    def save_deleted_tasks(self, task):
+        deleted_tasks = Stack()
+        with open(deleted_task_path, "w", newline="") as deleted_tasks_file:
+            writer = csv.writer(deleted_tasks_file)
+            writer.writerow(["Task", "Subject", "Due Date", "Description"])
+            for task in self:
+                writer.writerow([task.task, task.subject, task.due_date, task.description])
+                deleted_tasks.push(task)
+
+    def quicksort(self, start, end):
+        if start < end:
+            p = self.partition(start, end)
+            self.quicksort(start, p - 1)
+            self.quicksort(p + 1, end)
+
+    def partition(self, start, end):
+        pivot = self.nodeat(end).value.due_date
+        i = start - 1
+        for j in range(start, end):
+            if self.nodeat(j).value.due_date <= pivot:
+                i += 1
+                self.swap(i, j)
+        self.swap(i + 1, end)
+        return i + 1
+    
+    def swap(self, i, j):
+        temp = self.nodeat(i).value
+        self.nodeat(i).value = self.nodeat(j).value
+        self.nodeat(j).value = temp
+    
+    def sort_tasks(self):
+        self.quicksort(0, len(self) - 1)
+        self.save_tasks()
+        print("Tasks sorted by due_date.")
+    
+    def remove_all_tasks(self):
+        self.save_deleted_tasks(self)
+        node = self.first
+        print(node)
+        self.save_tasks()
+        print("All tasks removed.")
+    
+
 
 def display_menu():
-    print("Menu: [0] Help | [1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Exit\n")
+    print("Menu:\n[1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Clear tasks | [8] Exit\n")
 
 task_list = TaskList()
 
@@ -133,10 +207,12 @@ while True:
     if selection == 0:
         print("Not implemented yet, fool!")
         input("Press enter to return to menu...")
+        
     elif selection == 1:
         os.system("cls")
         task_list.display_tasks()
         input("Press enter to return to menu...")
+        
     elif selection == 2:
         task_list.display_tasks()
         task = input("Enter the task: ")
@@ -146,12 +222,14 @@ while True:
         if subject == "":
             subject = "No subject"
         due_date = input("Enter the due date (Year-Month-Day): ")
-        due_date_in_seconds = time.mktime(time.strptime(due_date, "%Y-%m-%d"))
-        if due_date_in_seconds < time.time():
-            print("Invalid due date. The due date must be in the future.")
+        if len(due_date) != 10:
+            print("Invalid date format. Please use YYYY-MM-DD.")
             input("Press enter to return to menu...")
             continue
-        elif due_date == "":
+        if datetime.datetime.strptime(due_date, "%Y-%m-%d") < datetime.datetime.now():
+            print("Invalid date. Please enter a date that has not already passed.")
+            continue
+        if due_date == "":
             due_date = "No due date"
         description = input("Enter the description: ")
         if description == "":
@@ -165,6 +243,7 @@ while True:
         elif option == 3:
             task_list.add_task_at(task, subject, due_date, description, int(input("Enter the index: ")))
         input("Press enter to return to menu...")
+        
     elif selection == 3:
         task_list.display_tasks()
         print("Delete task: [1] By index, [2] By name")
@@ -174,13 +253,36 @@ while True:
         elif option == 2:
             task_list.remove_task_by_name(input("Enter the name: "))
         input("Press enter to return to menu...")
+        
     elif selection == 4:
-        pass
+        task_list.display_tasks()
+        option = int(input("Search for task: [1] By due date, [2] By subject\nEnter a number to select an option: "))
+        if option == 1:
+            task_list.search_by_due_date(input("Enter the due date (Year-Month-Day): "))
+        elif option == 2:
+            task_list.search_by_subject(input("Enter the subject: "))
+        print("\nEdit task: [1] Yes, [2] No")
+        option = int(input("Enter a number to select an option: "))
+        if option == 1:
+            index = int(input("Enter the index of the task to edit: "))
+            print("Edit task: [1] Task, [2] Subject, [3] Due date, [4] Description")
+            option = int(input("Enter a number to select an option: "))
+            task_list.edit_task(index, option, input("Enter the new value: "))
+        if option == 2:
+            pass
+        input("Press enter to return to menu...")
+        
     elif selection == 5:
-        pass
+        task_list.sort_tasks()
+        input("Press enter to return to menu...")
+    
     elif selection == 6:
         pass
+    
     elif selection == 7:
+        task_list.remove_all_tasks()
+        input("Press enter to return to menu...")
+    
+    elif selection == 8:
+        input("Goodbye! Press enter to exit...")
         break
-
-input("Press enter to exit...")
