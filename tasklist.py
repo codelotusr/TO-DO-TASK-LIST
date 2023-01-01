@@ -57,11 +57,11 @@ class TaskList(sllist):
 
     def __init__(self):
         super().__init__()
+        print("Loading tasks...")
         self.load_tasks()
 ###
     def load_tasks(self):
         with open(task_path, "r", newline="") as task_file:
-            print("Loading tasks...")
             reader = csv.reader(task_file)
             next(reader)
             for row in reader:
@@ -152,13 +152,11 @@ class TaskList(sllist):
         print("Task edited.")
     
     def save_deleted_tasks(self, task):
-        deleted_tasks = Stack()
         with open(deleted_task_path, "w", newline="") as deleted_tasks_file:
             writer = csv.writer(deleted_tasks_file)
             writer.writerow(["Task", "Subject", "Due Date", "Description"])
             for task in self:
                 writer.writerow([task.task, task.subject, task.due_date, task.description])
-                deleted_tasks.push(task)
 
     def quicksort(self, start, end):
         if start < end:
@@ -200,17 +198,25 @@ class TaskList(sllist):
         print("All tasks removed.")
     
     def undo(self):
-        with open(deleted_task_path, "w", newline="") as task_file:
+        deleted_tasks = Stack()
+        with open(deleted_task_path, "r", newline="") as task_file:
+            reader = csv.reader(task_file)
+            next(reader)
+            for row in reader:
+                deleted_tasks.push(Task(row[0], row[1], row[2], row[3]))
+        with open(task_path, "w", newline="") as task_file:
             writer = csv.writer(task_file)
             writer.writerow(["Task", "Subject", "Due Date", "Description"])
-            for task in self:
+            for task in deleted_tasks:
                 writer.writerow([task.task, task.subject, task.due_date, task.description])
+        self.load_tasks()
+        self.save_tasks()
         print("Last action undone.")
     
 
 
 def display_menu():
-    print("Menu:[0] Help\n[1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo | [7] Clear tasks | [8] Exit\n")
+    print("Menu:[0] Help\n[1] Display tasks | [2] Add task | [3] Delete task | [4] Search for task | [5] Sort tasks | [6] Undo task clear | [7] Clear tasks | [8] Exit\n")
 
 task_list = TaskList()
 
@@ -291,7 +297,8 @@ while True:
         input("Press enter to return to menu...")
     
     elif selection == 6:
-        pass
+        task_list.undo()
+        input("Press enter to return to menu...")
     
     elif selection == 7:
         task_list.remove_all_tasks()
