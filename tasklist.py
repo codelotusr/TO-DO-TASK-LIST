@@ -213,6 +213,13 @@ class TaskList(sllist):
         self.load_tasks()
         self.save_tasks()
         print("Last action undone.")
+        
+    def find_nearest_task(self):
+        nearest_task = self.nodeat(0).value
+        for task in self:
+            if datetime.datetime.strptime(task.due_date, "%Y-%m-%d") < datetime.datetime.strptime(nearest_task.due_date, "%Y-%m-%d"):
+                nearest_task = task
+        print(f"Complete ASAP: {nearest_task}")
     
 
 
@@ -224,6 +231,7 @@ task_list = TaskList()
 while True:
     os.system("cls")
     display_menu()
+    task_list.find_nearest_task()
     selection = int(input("Enter a number to select an option: "))
     if selection == 0:
         print("[1] Display tasks: Displays all tasks in the list.")
