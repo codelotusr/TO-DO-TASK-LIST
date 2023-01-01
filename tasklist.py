@@ -140,6 +140,7 @@ class TaskList(sllist):
         elif choice == 3:
             if len(new_value) != 10:
                 print("Invalid date format. Please use YYYY-MM-DD.")
+                print("Example: 2025-12-31")
                 input("Press enter to return to menu...")
                 return
             if datetime.datetime.strptime(new_value, "%Y-%m-%d") < datetime.datetime.now():
@@ -225,7 +226,14 @@ while True:
     display_menu()
     selection = int(input("Enter a number to select an option: "))
     if selection == 0:
-        print("Not implemented yet, fool!")
+        print("[1] Display tasks: Displays all tasks in the list.")
+        print("[2] Add task: Adds a task to the list.")
+        print("[3] Delete task: Deletes a task from the list by index or by name.")
+        print("[4] Search for task: Searches for a task by due date or subject and then gives you the option to edit the task.")
+        print("[5] Sort tasks: Sorts the tasks by due date.")
+        print("[6] Undo task clear: Undoes the last action that cleared the task list.")
+        print("[7] Clear tasks: Clears all tasks from the list.")
+        print("[8] Exit: Exits the program.")
         input("Press enter to return to menu...")
         
     elif selection == 1:
@@ -244,6 +252,7 @@ while True:
         due_date = input("Enter the due date (Year-Month-Day): ")
         if len(due_date) != 10:
             print("Invalid date format. Please use YYYY-MM-DD.")
+            print("Example: 2025-12-31")
             input("Press enter to return to menu...")
             continue
         if datetime.datetime.strptime(due_date, "%Y-%m-%d") < datetime.datetime.now():
