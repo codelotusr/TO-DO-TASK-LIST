@@ -187,6 +187,9 @@ class TaskList(sllist):
         print("Tasks sorted by due_date.")
     
     def remove_all_tasks(self):
+        if len(self) == 0:
+            print("No tasks to remove.")
+            return
         self.save_deleted_tasks(self)
         node = self.first
         next = node.next
