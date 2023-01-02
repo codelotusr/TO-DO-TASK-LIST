@@ -216,6 +216,9 @@ class TaskList(sllist):
         print("Last action undone.")
         
     def find_nearest_task(self):
+        if len(self) == 0:
+            print("No tasks to complete.")
+            return
         nearest_task = self.nodeat(0).value
         for task in self:
             if datetime.datetime.strptime(task.due_date, "%Y-%m-%d") < datetime.datetime.strptime(nearest_task.due_date, "%Y-%m-%d"):
